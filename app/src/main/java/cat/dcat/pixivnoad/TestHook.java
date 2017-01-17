@@ -7,6 +7,8 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
+import java.lang.reflect.Field;
+
 /**
  * Created by DCat on 2016/12/18.
  */
@@ -24,6 +26,15 @@ public class TestHook implements IXposedHookLoadPackage {
                     Log.d(TAG, "called.");
                     param.setResult("true");
                 }
+            }
+        });
+        XposedBridge.hookAllMethods(XposedHelpers.findClass("jp.pxv.android.account.b", lpparam.classLoader), "a", new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                if(param.thisObject==null)return;
+                Log.d(TAG, param.method.toString() + "called.");
+                Field isPremium = param.thisObject.getClass().getField("f");
+                isPremium.set(param.thisObject, true);
             }
         });
         Log.d(TAG, "hooked:" + lpparam.packageName);
